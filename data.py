@@ -23,11 +23,21 @@ def clean_data(df, nulls=False):
     return df
 
 
-def preprocess(df):
+def cat_to_num(df):
+    X = df.drop('readmitted', axis=1)
+    X = pd.get_dummies(X, drop_first=True, dtype=int)
+    X['readmitted'] = df['readmitted']
+    return X
+
+
+def normalization(df):
     #TODO try scaling to 0-1
     #TODO try z-score scaling
-    #TODO try methods for turning categorial data numeric
-    #https://stackoverflow.com/questions/59538006/scaling-data-frame-with-numeric-and-categorical
+    return df
+
+
+def dimensionality_reduction(df):
+    #TODO
     return df
 
 
@@ -39,5 +49,5 @@ def generate_report(df):
 def get_data():
     df = pd.read_csv('data/diabetic_data.csv')
     df = clean_data(df)
-    df = preprocess(df)
+    df = cat_to_num(df)
     return df
