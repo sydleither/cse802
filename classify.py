@@ -4,7 +4,7 @@ from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn import tree, svm
-from scipy.stats import multivariate_normal
+from scipy.stats import multivariate_normal, norm
 
 
 def score(pred, true):
@@ -44,10 +44,10 @@ def mlp(X_train, y_train, X_test, y_test):
 
 
 def multivariate_gauss(X, means, covs):
-    class1 = multivariate_normal.pdf(X, means[0], covs[0], allow_singular=True)
-    class2 = multivariate_normal.pdf(X, means[1], covs[1], allow_singular=True)
-    class3 = multivariate_normal.pdf(X, means[2], covs[2], allow_singular=True)
-    return np.argmax([class1, class2, class3])
+    pdfs = []
+    for i in range(3):
+        pdfs.append(multivariate_normal.pdf(X, means[i], covs[i], allow_singular=True))
+    return np.argmax(pdfs)
 
 
 def bayes_classification(X_train, y_train, X_test, y_test):
@@ -61,8 +61,25 @@ def bayes_classification(X_train, y_train, X_test, y_test):
     score(pred, y_test)
     
     
-#TODO hw3 classifier
+def gaussian(X, means, vars_):
+    pdfs = []
+    for i in range(3):
+        class_pdf = norm.pdf(X, means[i], vars_[i])
+        class_pdf = class_pdf[~np.isnan(class_pdf)]
+        pdfs.append(np.prod(class_pdf))
+    return np.argmax(pdfs)
     
+    
+def bayes_classification_2(X_train, y_train, X_test, y_test):
+    means = []
+    vars_ = []
+    for i in set(y_train):
+        df_class = X_train.loc[y_train == i]
+        means.append(df_class.mean().tolist())
+        vars_.append(df_class.var().tolist())
+    pred = X_test.apply(gaussian, axis=1, args=(means, vars_))
+    score(pred, y_test)
+
     
 def parzen_window(X_train, y_train, X_test, y_test):
     pred = []

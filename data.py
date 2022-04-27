@@ -1,5 +1,5 @@
 import pandas as pd
-from pandas_profiling import ProfileReport #https://github.com/ydataai/pandas-profiling
+#from pandas_profiling import ProfileReport #https://github.com/ydataai/pandas-profiling
 from sklearn import preprocessing
 
 

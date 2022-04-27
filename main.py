@@ -4,7 +4,7 @@ import numpy as np
 from data import get_data
 from classify import random_baseline, decision_tree, random_forest, \
                      support_vector_machine, mlp, bayes_classification, \
-                     parzen_window
+                     bayes_classification_2, parzen_window
 
 
 def main():
@@ -19,7 +19,7 @@ def main():
         X_train, X_val = X_temp.iloc[train], X_temp.iloc[val]
         y_train, y_val = np.array(y_temp)[train], np.array(y_temp)[val]
 
-        bayes_classification(X_train, y_train, X_val, y_val)
+        bayes_classification_2(X_train, y_train, X_val, y_val)
 
     
 if __name__ == '__main__':
