@@ -1,10 +1,28 @@
-from sklearn.model_selection import StratifiedKFold, train_test_split
 import numpy as np
+import random
+from sklearn.model_selection import StratifiedKFold, train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn import tree
+from sklearn.svm import LinearSVC
+from sklearn.metrics import confusion_matrix, accuracy_score, f1_score
 
-from data import get_data
-from classify import random_baseline, decision_tree, random_forest, \
-                     support_vector_machine, mlp, bayes_classification, \
-                     bayes_classification_2, parzen_window
+from data import get_data, dimensionality_reduction
+from bayes_classifiers import MultiVariateBayes, GaussianBayes, ParzenWindow
+
+
+def random_baseline(y):
+    pred = [random.randint(0, 2) for x in range(len(y))]
+    score(pred, y)
+
+
+def score(pred, true):
+    conf = confusion_matrix(pred, true)
+    acc = accuracy_score(pred, true)
+    f1 = f1_score(pred, true, average=None)
+    print(f1)
+    print(acc)
+    print(conf)
 
 
 def main():
@@ -12,14 +30,24 @@ def main():
     label_map = dict([(y,x) for x,y in enumerate(sorted(set(df['readmitted'])))])
     y = [label_map[x] for x in df['readmitted']]
     X = df.drop('readmitted', axis=1)
-
-    X_temp, X_test, y_temp, y_test = train_test_split(X, y, stratify=y, test_size=0.2)
     
+    X = dimensionality_reduction(X)
+
+    #TODO save as seperate datasets when ready to test model parameters
+    X_temp, X_test, y_temp, y_test = train_test_split(X, y, stratify=y, test_size=0.2, random_state=3)
+    
+    classifiers = [tree.DecisionTreeClassifier(), RandomForestClassifier(10), \
+                   LinearSVC(), MLPClassifier(), MultiVariateBayes(), \
+                   GaussianBayes(), ParzenWindow()]
     for train, val in StratifiedKFold(4).split(X_temp, y_temp): #60/20/20 split
         X_train, X_val = X_temp.iloc[train], X_temp.iloc[val]
         y_train, y_val = np.array(y_temp)[train], np.array(y_temp)[val]
 
-        bayes_classification_2(X_train, y_train, X_val, y_val)
+        for classifier in classifiers:
+            print(classifier)
+            clf = classifier.fit(X_train, y_train)
+            pred = clf.predict(X_val)
+            score(pred, y_val)
 
     
 if __name__ == '__main__':

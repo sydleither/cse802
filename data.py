@@ -1,6 +1,9 @@
 import pandas as pd
-#from pandas_profiling import ProfileReport #https://github.com/ydataai/pandas-profiling
+from pandas_profiling import ProfileReport #https://github.com/ydataai/pandas-profiling
 from sklearn import preprocessing
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.feature_selection import SequentialFeatureSelector
+from sklearn.decomposition import PCA
 
 
 def clean_data(df, nulls=False):
@@ -30,15 +33,26 @@ def cat_to_num(df):
     return X
 
 
-def normalization(df):
-    #TODO try scaling to 0-1
-    #TODO try z-score scaling
+def normalize(df, z_score=False):
+    if z_score:
+        scaler = StandardScaler() #z-score
+    else:
+        scaler = MinMaxScaler() #0-1
+    numerics = df.select_dtypes(exclude=['object'])
+    df[numerics.columns] = scaler.fit_transform(numerics)
     return df
 
 
-def dimensionality_reduction(df):
-    #TODO
-    return df
+def dimensionality_reduction(X):
+    pca = PCA(n_components='mle').fit(X)
+    return pca
+
+
+def feature_selection(X, y, model, n_features=None, direction='forward'):
+    sfs = SequentialFeatureSelector(model, n_features_to_select=n_features, direction=direction)
+    sfs.fit(X, y)
+    X = X[X.columns[sfs.get_support()]]
+    return X
 
 
 def generate_report(df):
@@ -49,5 +63,6 @@ def generate_report(df):
 def get_data():
     df = pd.read_csv('data/diabetic_data.csv')
     df = clean_data(df)
+    df = normalize(df, False)
     df = cat_to_num(df)
     return df

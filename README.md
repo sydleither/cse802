@@ -7,4 +7,10 @@ ideas for report
 
     75% of samples have caucasian race
     
-    features go from 48 to 4800 with one-hot encoding
+    features go from 48 to 4800 with one-hot encoding (due to diag columns)
+    
+    Without diag, go from 48 to 227, but accuracy on many classifiers drop
+    
+    discuss runtime as part of results
+    
+    data normalization not that helpful since most features categorial
