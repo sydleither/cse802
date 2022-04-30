@@ -7,7 +7,7 @@ from sklearn import tree
 from sklearn.svm import LinearSVC
 from sklearn.metrics import confusion_matrix, accuracy_score, f1_score
 
-from data import get_data, dimensionality_reduction
+from data import get_data, dimensionality_reduction, feature_selection
 from bayes_classifiers import MultiVariateBayes, GaussianBayes, ParzenWindow
 
 
@@ -31,7 +31,7 @@ def main():
     y = [label_map[x] for x in df['readmitted']]
     X = df.drop('readmitted', axis=1)
     
-    X = dimensionality_reduction(X)
+    #X = dimensionality_reduction(X)
 
     #TODO save as seperate datasets when ready to test model parameters
     X_temp, X_test, y_temp, y_test = train_test_split(X, y, stratify=y, test_size=0.2, random_state=3)
@@ -45,6 +45,11 @@ def main():
 
         for classifier in classifiers:
             print(classifier)
+            
+            #sfs = feature_selection(X_train, y_train, classifier, n_features=10, direction='forward')
+            #X_train_reduce = X_train[X_train.columns[sfs.get_support()]]
+            #X_val_reduce = X_val[X_val.columns[sfs.get_support()]]
+            
             clf = classifier.fit(X_train, y_train)
             pred = clf.predict(X_val)
             score(pred, y_val)

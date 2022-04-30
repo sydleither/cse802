@@ -12,5 +12,7 @@ ideas for report
     Without diag, go from 48 to 227, but accuracy on many classifiers drop
     
     discuss runtime as part of results
+
+    if somebody died before being readmitted
     
-    data normalization not that helpful since most features categorial
+    large time span of samples

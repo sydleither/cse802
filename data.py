@@ -1,6 +1,5 @@
 import pandas as pd
 from pandas_profiling import ProfileReport #https://github.com/ydataai/pandas-profiling
-from sklearn import preprocessing
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.feature_selection import SequentialFeatureSelector
 from sklearn.decomposition import PCA
@@ -18,11 +17,21 @@ def clean_data(df, nulls=False):
     
     #drop id columns
     df.drop('encounter_id', axis=1, inplace=True)
-    df.drop('patient_nbr', axis=1, inplace=True) #TODO try combining entries?
     
     #drop columns with only one value
     df.drop('examide', axis=1, inplace=True)
     df.drop('citoglipton', axis=1, inplace=True)
+    
+    #following Strack et al.
+    df.drop('payer_code', axis=1, inplace=True)
+    df.drop('weight', axis=1, inplace=True)
+    df = df[(df['discharge_disposition_id'] !='11') & \
+            (df['discharge_disposition_id'] !='19') & \
+            (df['discharge_disposition_id'] !='20') & \
+            (df['discharge_disposition_id'] !='20') & \
+            (df['discharge_disposition_id'] !='13') & \
+            (df['discharge_disposition_id'] !='14')]
+    df = df.drop_duplicates(subset=['patient_nbr'])
     return df
 
 
@@ -44,15 +53,14 @@ def normalize(df, z_score=False):
 
 
 def dimensionality_reduction(X):
-    pca = PCA(n_components='mle').fit(X)
+    pca = PCA(n_components='mle').fit_transform(X)
     return pca
 
 
 def feature_selection(X, y, model, n_features=None, direction='forward'):
     sfs = SequentialFeatureSelector(model, n_features_to_select=n_features, direction=direction)
     sfs.fit(X, y)
-    X = X[X.columns[sfs.get_support()]]
-    return X
+    return sfs
 
 
 def generate_report(df):
@@ -63,6 +71,6 @@ def generate_report(df):
 def get_data():
     df = pd.read_csv('data/diabetic_data.csv')
     df = clean_data(df)
-    df = normalize(df, False)
+    df = normalize(df, True)
     df = cat_to_num(df)
     return df
