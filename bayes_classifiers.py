@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from scipy.stats import multivariate_normal, norm
@@ -74,9 +75,9 @@ class GaussianBayes(BaseEstimator):
         return pred
     
     
-class ParzenWindow(BaseEstimator):
-    def __init__(self):
-        pass
+class KNN(BaseEstimator):
+    def __init__(self, k):
+        self.k = k
 
     def fit(self, X, y):
         X, y = check_X_y(X, y, accept_sparse=True)
@@ -91,16 +92,16 @@ class ParzenWindow(BaseEstimator):
         X = check_array(X, accept_sparse=True)
         check_is_fitted(self, 'is_fitted_')
         
+        k = self.k
         pred = []
         for row in X:
-            ps = []
-            for i in sorted(set(self.y_train)):
-                X_class = self.X_train[self.y_train == i]
-                p = 0
-                for xi in X_class:
-                    p += multivariate_normal.pdf(row-xi, [0]*len(xi))
-                ps.append(p/len(X_class))
-            pred.append(np.argmax(ps))
+            distances = []
+            for i,x in enumerate(self.X_train):
+                distance = math.dist(row, x)
+                distances.append((distance, self.y_train[i]))
+            distances.sort()
+            result = [x[1] for x in distances[0:k]]
+            pred.append(np.argmax([result.count(0), result.count(1), result.count(2)]))
         self.pred = pred
         
         return self.pred
